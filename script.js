@@ -4,12 +4,14 @@
 
   // ===== Constants =====
   const STORAGE_KEY = 'expenseTracker:expenses:v1';
+  const BUDGET_STORAGE_KEY = 'expenseTracker:budget:v1';
   const CATEGORIES = ['Food', 'Transport', 'Entertainment', 'Bills', 'Shopping', 'Other'];
 
   // ===== State =====
   /** @type {Array<{id:string, amountCents:number, category:string, date:string, description:string}>} */
   let expenses = [];
   let filters = { category: 'all', fromDate: '', toDate: '' };
+  let monthlyBudgetCents = 0;
 
   // ===== DOM Refs =====
   const form = document.getElementById('expense-form');
@@ -29,6 +31,16 @@
   const txCountEl = document.getElementById('transaction-count');
   const categoryChartEl = document.getElementById('category-chart');
   const categoryBreakdownEl = document.getElementById('category-breakdown');
+
+  // Budget elements
+  const monthlyBudgetEl = document.getElementById('monthly-budget');
+  const budgetRemainingEl = document.getElementById('budget-remaining');
+  const budgetInput = document.getElementById('budget-input');
+  const setBudgetBtn = document.getElementById('set-budget-btn');
+  const clearBudgetBtn = document.getElementById('clear-budget-btn');
+  const budgetProgressEl = document.getElementById('budget-progress');
+  const progressFillEl = document.getElementById('progress-fill');
+  const budgetStatusEl = document.getElementById('budget-status');
 
   // ===== Utilities =====
   function todayStr() {
@@ -53,6 +65,21 @@
 
   function saveExpenses(list) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  }
+
+  function loadBudget() {
+    try {
+      const raw = localStorage.getItem(BUDGET_STORAGE_KEY);
+      if (!raw) return 0;
+      const parsed = Number(raw);
+      return Number.isFinite(parsed) && parsed >= 0 ? Math.round(parsed) : 0;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  function saveBudget(budgetCents) {
+    localStorage.setItem(BUDGET_STORAGE_KEY, String(budgetCents));
   }
 
   function isValidExpenseShape(obj) {
@@ -90,6 +117,15 @@
     if (a < b) return -1;
     if (a > b) return 1;
     return 0;
+  }
+
+  function getCurrentMonthExpenses() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const monthPrefix = `${year}-${month}`;
+    
+    return expenses.filter(expense => expense.date.startsWith(monthPrefix));
   }
 
   // ===== Rendering =====
@@ -149,6 +185,31 @@
     totalSpentEl.textContent = formatCents(total);
     txCountEl.textContent = String(list.length);
 
+    // Budget stats
+    const monthlyExpenses = getCurrentMonthExpenses();
+    const monthlySpent = monthlyExpenses.reduce((sum, e) => sum + e.amountCents, 0);
+    
+    monthlyBudgetEl.textContent = formatCents(monthlyBudgetCents);
+    
+    if (monthlyBudgetCents > 0) {
+      const remaining = monthlyBudgetCents - monthlySpent;
+      budgetRemainingEl.textContent = formatCents(remaining);
+      
+      // Apply color classes based on budget status
+      budgetRemainingEl.className = 'stat-value';
+      if (remaining < 0) {
+        budgetRemainingEl.classList.add('danger');
+      } else if (remaining < monthlyBudgetCents * 0.2) {
+        budgetRemainingEl.classList.add('warning');
+      }
+      
+      renderBudgetProgress(monthlySpent);
+    } else {
+      budgetRemainingEl.textContent = '—';
+      budgetRemainingEl.className = 'stat-value';
+      budgetProgressEl.style.display = 'none';
+    }
+
     const perCategory = new Map();
     CATEGORIES.forEach((c) => perCategory.set(c, 0));
     for (const e of list) perCategory.set(e.category, perCategory.get(e.category) + e.amountCents);
@@ -175,6 +236,83 @@
       .sort((a, b) => b[1] - a[1])
       .map(([cat, cents]) => `<li><span>${cat}</span><span>${formatCents(cents)}</span></li>`);
     categoryBreakdownEl.innerHTML = items.join('') || '<li><span>—</span><span>$0.00</span></li>';
+  }
+
+  function renderBudgetProgress(monthlySpent) {
+    budgetProgressEl.style.display = 'block';
+    
+    const percentage = Math.min(100, (monthlySpent / monthlyBudgetCents) * 100);
+    progressFillEl.style.width = `${percentage}%`;
+    
+    // Reset classes
+    progressFillEl.className = 'progress-fill';
+    budgetStatusEl.className = 'budget-status';
+    
+    let statusText = '';
+    if (monthlySpent > monthlyBudgetCents) {
+      progressFillEl.classList.add('danger');
+      budgetStatusEl.classList.add('danger');
+      const overAmount = formatCents(monthlySpent - monthlyBudgetCents);
+      statusText = `Over budget by ${overAmount}`;
+    } else if (monthlySpent > monthlyBudgetCents * 0.8) {
+      progressFillEl.classList.add('warning');
+      budgetStatusEl.classList.add('warning');
+      statusText = `${percentage.toFixed(1)}% of budget used`;
+    } else {
+      statusText = `${percentage.toFixed(1)}% of budget used`;
+    }
+    
+    budgetStatusEl.textContent = statusText;
+  }
+
+  function showBudgetAlert(type, message) {
+    // Remove existing alerts
+    const existingAlert = document.querySelector('.budget-alert');
+    if (existingAlert) {
+      existingAlert.remove();
+    }
+
+    const alert = document.createElement('div');
+    alert.className = `budget-alert ${type}`;
+    alert.innerHTML = `
+      <div class="budget-alert-header">
+        <h4 class="budget-alert-title">${type === 'danger' ? '⚠️ Budget Exceeded!' : '⚠️ Budget Warning'}</h4>
+        <button class="budget-alert-close" aria-label="Close alert">×</button>
+      </div>
+      <p>${message}</p>
+    `;
+
+    document.body.appendChild(alert);
+
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+      if (alert.parentNode) {
+        alert.remove();
+      }
+    }, 5000);
+
+    // Close button
+    alert.querySelector('.budget-alert-close').addEventListener('click', () => {
+      alert.remove();
+    });
+  }
+
+  function checkBudgetWarnings(previousSpent, newSpent) {
+    if (monthlyBudgetCents <= 0) return;
+
+    const budget = monthlyBudgetCents;
+    const warningThreshold = budget * 0.8;
+
+    // Check if we've exceeded the budget
+    if (previousSpent <= budget && newSpent > budget) {
+      const overAmount = formatCents(newSpent - budget);
+      showBudgetAlert('danger', `You've exceeded your monthly budget by ${overAmount}. Consider reviewing your spending.`);
+    }
+    // Check if we've hit the warning threshold
+    else if (previousSpent <= warningThreshold && newSpent > warningThreshold) {
+      const remaining = formatCents(budget - newSpent);
+      showBudgetAlert('warning', `You've used 80% of your monthly budget. You have ${remaining} remaining.`);
+    }
   }
 
   function updateUI() {
@@ -215,6 +353,10 @@
       return;
     }
 
+    // Check budget warnings before adding expense
+    const monthlyExpenses = getCurrentMonthExpenses();
+    const previousMonthlySpent = monthlyExpenses.reduce((sum, e) => sum + e.amountCents, 0);
+
     const newExpense = {
       id: generateId(),
       amountCents,
@@ -225,6 +367,14 @@
 
     expenses.push(newExpense);
     saveExpenses(expenses);
+
+    // Check if this expense triggers budget warnings (only for current month expenses)
+    const now = new Date();
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    if (dateStr.startsWith(currentMonth)) {
+      const newMonthlySpent = previousMonthlySpent + amountCents;
+      checkBudgetWarnings(previousMonthlySpent, newMonthlySpent);
+    }
 
     form.reset();
     dateInput.max = todayStr(); // keep fresh
@@ -301,6 +451,26 @@
     URL.revokeObjectURL(url);
   }
 
+  function onSetBudget() {
+    const budgetAmount = parseAmountToCents(budgetInput.value);
+    if (!budgetAmount) {
+      alert('Please enter a valid budget amount.');
+      return;
+    }
+
+    monthlyBudgetCents = budgetAmount;
+    saveBudget(monthlyBudgetCents);
+    budgetInput.value = '';
+    updateUI();
+  }
+
+  function onClearBudget() {
+    monthlyBudgetCents = 0;
+    saveBudget(monthlyBudgetCents);
+    budgetInput.value = '';
+    updateUI();
+  }
+
   // ===== Helpers =====
   function escapeHtml(str) {
     return str
@@ -339,6 +509,7 @@
 
     // Load state
     expenses = loadExpenses();
+    monthlyBudgetCents = loadBudget();
 
     // Events
     form.addEventListener('submit', onFormSubmit);
@@ -348,6 +519,8 @@
     filterToInput.addEventListener('change', onFiltersChange);
     clearFiltersBtn.addEventListener('click', clearFilters);
     exportCsvBtn.addEventListener('click', exportCsv);
+    setBudgetBtn.addEventListener('click', onSetBudget);
+    clearBudgetBtn.addEventListener('click', onClearBudget);
 
     updateUI();
   }
