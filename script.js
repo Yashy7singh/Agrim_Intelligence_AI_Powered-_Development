@@ -131,15 +131,23 @@
   // ===== Rendering =====
   function getFilteredExpenses() {
     let list = expenses.slice();
+    console.log('Starting filter with', list.length, 'expenses');
+    console.log('Current filters:', filters);
 
     if (filters.category && filters.category !== 'all') {
+      const beforeCount = list.length;
       list = list.filter((e) => e.category === filters.category);
+      console.log(`Category filter '${filters.category}': ${beforeCount} -> ${list.length}`);
     }
     if (filters.fromDate) {
+      const beforeCount = list.length;
       list = list.filter((e) => compareDateStrings(e.date, filters.fromDate) >= 0);
+      console.log(`From date filter '${filters.fromDate}': ${beforeCount} -> ${list.length}`);
     }
     if (filters.toDate) {
+      const beforeCount = list.length;
       list = list.filter((e) => compareDateStrings(e.date, filters.toDate) <= 0);
+      console.log(`To date filter '${filters.toDate}': ${beforeCount} -> ${list.length}`);
     }
 
     // Newest first
@@ -149,6 +157,7 @@
       return a.id < b.id ? 1 : -1;
     });
 
+    console.log('Final filtered list:', list.length, 'expenses');
     return list;
   }
 
@@ -400,6 +409,10 @@
     filters.fromDate = filterFromInput.value || '';
     filters.toDate = filterToInput.value || '';
 
+    // Debug logging
+    console.log('Filters changed:', filters);
+    console.log('Total expenses:', expenses.length);
+
     // Ensure from <= to if both set
     if (filters.fromDate && filters.toDate && compareDateStrings(filters.fromDate, filters.toDate) > 0) {
       // Swap
@@ -495,8 +508,11 @@
       CATEGORIES.map((c) => `<option value="${c}">${c}</option>`).join('');
 
     // Add categories to filter select (+All)
-    filterCategorySelect.innerHTML = '<option value="all">All</option>' +
+    filterCategorySelect.innerHTML = '<option value="all" selected>All</option>' +
       CATEGORIES.map((c) => `<option value="${c}">${c}</option>`).join('');
+    
+    // Ensure the filter select shows "All" as selected
+    filterCategorySelect.value = 'all';
   }
 
   function init() {
@@ -511,17 +527,72 @@
     expenses = loadExpenses();
     monthlyBudgetCents = loadBudget();
 
+    // Add sample data if no expenses exist (for testing)
+    if (expenses.length === 0) {
+      console.log('Adding sample data for testing...');
+      const sampleExpenses = [
+        {
+          id: 'sample_1',
+          amountCents: 1250,
+          category: 'Food',
+          date: '2024-10-01',
+          description: 'Lunch at restaurant'
+        },
+        {
+          id: 'sample_2',
+          amountCents: 3000,
+          category: 'Transport',
+          date: '2024-10-02',
+          description: 'Gas for car'
+        },
+        {
+          id: 'sample_3',
+          amountCents: 1500,
+          category: 'Entertainment',
+          date: '2024-10-03',
+          description: 'Movie tickets'
+        },
+        {
+          id: 'sample_4',
+          amountCents: 2500,
+          category: 'Food',
+          date: '2024-10-04',
+          description: 'Groceries'
+        },
+        {
+          id: 'sample_5',
+          amountCents: 5000,
+          category: 'Bills',
+          date: '2024-10-05',
+          description: 'Electricity bill'
+        }
+      ];
+      expenses = sampleExpenses;
+      saveExpenses(expenses);
+    }
+
     // Events
     form.addEventListener('submit', onFormSubmit);
     tbody.addEventListener('click', onDeleteClick);
+    
+    // Filter event listeners with debugging
+    console.log('Attaching filter event listeners...');
+    console.log('filterCategorySelect:', filterCategorySelect);
+    console.log('filterFromInput:', filterFromInput);
+    console.log('filterToInput:', filterToInput);
+    
     filterCategorySelect.addEventListener('change', onFiltersChange);
-    filterFromInput.addEventListener('change', onFiltersChange);
-    filterToInput.addEventListener('change', onFiltersChange);
+    filterFromInput.addEventListener('input', onFiltersChange);
+    filterToInput.addEventListener('input', onFiltersChange);
     clearFiltersBtn.addEventListener('click', clearFilters);
     exportCsvBtn.addEventListener('click', exportCsv);
     setBudgetBtn.addEventListener('click', onSetBudget);
     clearBudgetBtn.addEventListener('click', onClearBudget);
 
+    // Initialize filter state
+    console.log('Initializing filter state...');
+    filters = { category: 'all', fromDate: '', toDate: '' };
+    
     updateUI();
   }
 
