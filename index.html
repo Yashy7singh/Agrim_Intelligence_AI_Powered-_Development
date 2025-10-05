@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Personal Expense Tracker</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="container header-content">
+      <h1>Personal Expense Tracker</h1>
+      <div class="header-actions">
+        <button id="export-csv-btn" class="btn btn-secondary" title="Export current view to CSV">Export CSV</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container app-main">
+    <section class="card" aria-labelledby="add-expense-title">
+      <h2 id="add-expense-title">Add Expense</h2>
+      <form id="expense-form" novalidate>
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="amount">Amount</label>
+            <input id="amount" name="amount" type="number" step="0.01" min="0.01" placeholder="0.00" required />
+            <small class="hint">Positive number, e.g., 12.50</small>
+          </div>
+
+          <div class="form-field">
+            <label for="category">Category</label>
+            <select id="category" name="category" required>
+              <!-- Populated by script.js -->
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="date">Date</label>
+            <input id="date" name="date" type="date" required />
+          </div>
+
+          <div class="form-field form-field--full">
+            <label for="description">Description (optional)</label>
+            <input id="description" name="description" type="text" maxlength="140" placeholder="e.g., Lunch at cafe" />
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Add Expense</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card" aria-labelledby="filters-title">
+      <h2 id="filters-title">Filters</h2>
+      <div class="filters-grid">
+        <div class="form-field">
+          <label for="filter-category">Category</label>
+          <select id="filter-category">
+            <!-- Populated by script.js -->
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="filter-from">From</label>
+          <input id="filter-from" type="date" />
+        </div>
+        <div class="form-field">
+          <label for="filter-to">To</label>
+          <input id="filter-to" type="date" />
+        </div>
+        <div class="form-actions">
+          <button id="clear-filters-btn" class="btn btn-light" type="button">Clear Filters</button>
+        </div>
+      </div>
+      <p class="subtle">Statistics and list reflect the current filters.</p>
+    </section>
+
+    <section class="card" aria-labelledby="stats-title">
+      <h2 id="stats-title">Statistics</h2>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Total Spent</div>
+          <div id="total-spent" class="stat-value">$0.00</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Transactions</div>
+          <div id="transaction-count" class="stat-value">0</div>
+        </div>
+      </div>
+
+      <div class="breakdown">
+        <h3>By Category</h3>
+        <div id="category-chart" class="category-chart" role="img" aria-label="Spending by category chart">
+          <!-- Bars injected by script.js -->
+        </div>
+        <ul id="category-breakdown" class="category-breakdown">
+          <!-- Breakdown list injected by script.js -->
+        </ul>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="list-title">
+      <h2 id="list-title">Expenses</h2>
+      <div class="table-wrap">
+        <table class="table" aria-describedby="list-title">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Category</th>
+              <th class="num">Amount</th>
+              <th>Description</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="expenses-tbody">
+            <!-- Rows injected by script.js -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <div class="container">
+      <small>Data is stored locally in your browser.</small>
+    </div>
+  </footer>
+
+  <script src="./script.js" defer></script>
+</body>
+</html>
