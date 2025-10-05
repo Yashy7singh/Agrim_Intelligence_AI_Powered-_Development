@@ -119,6 +119,16 @@ input:focus, select:focus, textarea:focus { border-color: var(--secondary); box-
   .filters-grid .form-actions { grid-column: 1 / -1; justify-self: start; }
 }
 
+.filter-status {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: rgba(96, 165, 250, 0.1);
+  border: 1px solid rgba(96, 165, 250, 0.3);
+  border-radius: 8px;
+  color: var(--secondary);
+  font-size: 0.85rem;
+}
+
 /* ===== Buttons ===== */
 .btn {
   display: inline-flex;
@@ -155,11 +165,20 @@ input:focus, select:focus, textarea:focus { border-color: var(--secondary); box-
 
 .breakdown { margin-top: 10px; }
 .category-chart { display: grid; gap: 8px; margin-top: 6px; }
-.chart-row { display: grid; grid-template-columns: 110px 1fr 100px; align-items: center; gap: 10px; }
+.chart-row { display: grid; grid-template-columns: 110px 1fr 120px; align-items: center; gap: 10px; }
+@media (max-width: 640px) {
+  .chart-row { grid-template-columns: 80px 1fr 100px; gap: 8px; }
+}
 .chart-label { color: var(--muted); font-size: 0.9rem; }
 .chart-bar { height: 12px; background: #0d162a; border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
 .chart-bar-fill { height: 100%; background: linear-gradient(90deg, var(--secondary), #22d3ee); }
-.chart-amount { text-align: right; font-variant-numeric: tabular-nums; }
+.chart-amount { text-align: right; font-variant-numeric: tabular-nums; font-size: 0.85rem; }
+.chart-empty { 
+  text-align: center; 
+  color: var(--muted); 
+  font-style: italic; 
+  padding: 20px; 
+}
 
 .category-breakdown { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 4px; }
 .category-breakdown li { display: flex; justify-content: space-between; color: var(--muted); font-size: 0.9rem; }
