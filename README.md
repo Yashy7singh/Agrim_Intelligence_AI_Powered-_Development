@@ -54,20 +54,15 @@ Preference is saved in localStorage
 ## 🧠 Cursor Usage Documentation
 🔹 3–5 Interesting Prompts Used
 
-a) App Skeleton Creation
-“Create a basic Personal Expense Tracker web app structure using HTML, CSS, and JavaScript. Include a form, list, filter panel, and stats section.”
+1) “Create a basic Personal Expense Tracker web app structure using HTML, CSS, and JavaScript. The app should include a section for adding expenses, a list to display them, a filter panel, and a statistics dashboard. Use responsive layout and a clean, modern design. Keep the JavaScript logic in a separate file (script.js) and prepare the structure to use localStorage for saving expenses.”
 
-b)Form Logic & Validation
-“Implement a form to add expenses with amount, category, date, and description. Validate positive amounts and prevent future dates.”
+2) "Implement the 'Add Expense' form in JavaScript. It should include input fields for amount, category, date, and description. Validate that the amount is positive and date is not in the future. On submit, save the expense data (as objects) to localStorage and refresh the displayed expense list dynamically."
 
-c)Filtering System
-“Add category and date range filters to the expense list. Include a ‘Clear Filters’ button to reset results.”
+3) "Write JavaScript code that loads all expenses from localStorage and displays them in a clean, styled list format (date, category, amount, description). Add a delete button next to each item that removes that expense from localStorage and updates the list in real-time."
 
-d)Statistics Dashboard
-“Display total spending, total transactions, and spending by category dynamically using JavaScript.”
+4) "Add a filtering feature that allows users to filter expenses by category and date range (from–to). Include a 'Clear Filters' button that resets the view to show all expenses. Ensure that the filtering works dynamically without reloading the page."
 
-e)Dark Mode Feature
-“Add a dark/light mode toggle button that saves user preference in localStorage.”
+5) “Add a dark/light mode toggle button that saves user preference in localStorage.”
 
 
 
