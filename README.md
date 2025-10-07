@@ -11,7 +11,7 @@ Open the folder in Cursor AI or your preferred code editor.
 Simply open index.html in your browser.
 (No server required — runs fully on client-side using localStorage.)
 
-✨ Key Features Implemented
+## ✨ Key Features Implemented
 
 ✅ Add Expense Form
 
@@ -49,7 +49,7 @@ Users can switch between light and dark themes
 
 Preference is saved in localStorage
 
-🧠 Cursor Usage Documentation
+## 🧠 Cursor Usage Documentation
 🔹 3–5 Interesting Prompts Used
 
 App Skeleton Creation
