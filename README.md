@@ -1,5 +1,5 @@
 # Agrim_Intelligence_AI_Powered-_Development
-🚀 How to Run the Application
+## 🚀 How to Run the Application
 
 Clone or Download the project folder.
 
