@@ -49,30 +49,29 @@ Users can switch between light and dark themes
 
 Preference is saved in localStorage
 
+
+
 ## 🧠 Cursor Usage Documentation
 🔹 3–5 Interesting Prompts Used
 
-App Skeleton Creation
-
+a) App Skeleton Creation
 “Create a basic Personal Expense Tracker web app structure using HTML, CSS, and JavaScript. Include a form, list, filter panel, and stats section.”
 
-Form Logic & Validation
-
+b)Form Logic & Validation
 “Implement a form to add expenses with amount, category, date, and description. Validate positive amounts and prevent future dates.”
 
-Filtering System
-
+c)Filtering System
 “Add category and date range filters to the expense list. Include a ‘Clear Filters’ button to reset results.”
 
-Statistics Dashboard
-
+d)Statistics Dashboard
 “Display total spending, total transactions, and spending by category dynamically using JavaScript.”
 
-Dark Mode Feature
-
+e)Dark Mode Feature
 “Add a dark/light mode toggle button that saves user preference in localStorage.”
 
-🔹 How Cursor Helped Solve Challenges
+
+
+## 🔹 How Cursor Helped Solve Challenges
 
 Faster Prototyping: Cursor’s AI autocompletion and prompt-based code generation saved time in creating boilerplate HTML/JS logic.
 
@@ -80,7 +79,9 @@ Debugging Assistance: Cursor highlighted logical errors in localStorage handling
 
 Code Styling: Cursor’s inline suggestions improved readability and modularity, such as separating form validation logic into helper functions.
 
-🔹 Modifications Made to AI-Generated Code
+
+
+## 🔹 Modifications Made to AI-Generated Code
 
 Improved Validation: The AI initially allowed “0” as an amount — manually fixed to enforce > 0.
 
