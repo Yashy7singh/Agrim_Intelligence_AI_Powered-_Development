@@ -29,6 +29,9 @@
   const txCountEl = document.getElementById('transaction-count');
   const categoryChartEl = document.getElementById('category-chart');
   const categoryBreakdownEl = document.getElementById('category-breakdown');
+  const chartCanvas = /** @type {HTMLCanvasElement|null} */(document.getElementById('category-chart-canvas'));
+  /** @type {any|null} */
+  let chartInstance = null;
 
   // ===== Utilities =====
   function todayStr() {
@@ -155,7 +158,7 @@
 
     const maxCents = Math.max(1, ...Array.from(perCategory.values()));
 
-    // Chart bars
+    // Chart bars (custom CSS-based)
     const chartRows = Array.from(perCategory.entries()).map(([cat, cents]) => {
       const pct = Math.round((cents / maxCents) * 100);
       return `
@@ -175,6 +178,61 @@
       .sort((a, b) => b[1] - a[1])
       .map(([cat, cents]) => `<li><span>${cat}</span><span>${formatCents(cents)}</span></li>`);
     categoryBreakdownEl.innerHTML = items.join('') || '<li><span>—</span><span>$0.00</span></li>';
+
+    // Chart.js (optional) if available
+    if (chartCanvas && typeof window.Chart !== 'undefined') {
+      const labels = Array.from(perCategory.keys());
+      const data = Array.from(perCategory.values()).map((c) => Math.round(c / 100));
+
+      const chartData = {
+        labels,
+        datasets: [{
+          label: 'Spending by Category (USD)',
+          data,
+          backgroundColor: 'rgba(96, 165, 250, 0.5)',
+          borderColor: 'rgb(96, 165, 250)',
+          borderWidth: 1,
+          borderRadius: 6,
+        }],
+      };
+
+      const options = {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              // show dollars
+              callback: (value) => `$${value}`,
+            },
+            grid: { color: 'rgba(148,163,184,0.15)' },
+          },
+          x: { grid: { display: false } },
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `$${ctx.parsed.y}`,
+            },
+          },
+        },
+      };
+
+      if (chartInstance) {
+        chartInstance.data = chartData;
+        chartInstance.options = options;
+        chartInstance.update();
+      } else {
+        const ctx = chartCanvas.getContext('2d');
+        chartInstance = new window.Chart(ctx, {
+          type: 'bar',
+          data: chartData,
+          options,
+        });
+      }
+    }
   }
 
   function updateUI() {

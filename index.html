@@ -89,6 +89,9 @@
 
       <div class="breakdown">
         <h3>By Category</h3>
+        <div class="chartjs-container">
+          <canvas id="category-chart-canvas" role="img" aria-label="Bar chart of spending by category"></canvas>
+        </div>
         <div id="category-chart" class="category-chart" role="img" aria-label="Spending by category chart">
           <!-- Bars injected by script.js -->
         </div>
@@ -125,6 +128,7 @@
     </div>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
   <script src="./script.js" defer></script>
 </body>
 </html>
